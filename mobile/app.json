@@ -4,11 +4,6 @@
     "slug": "mobile",
     "version": "1.0.0",
     "assetBundlePatterns": ["**/*"],
-    "plugins": [
-      [
-        "expo-asset"
-      ]
-    ],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
