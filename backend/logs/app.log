@@ -103,3 +103,13 @@
 2024-09-30 03:22:08,055 INFO: Client connected via WebSocket
 2024-09-30 03:22:17,800 INFO: Message received via WebSocket: app.logger.info
 2024-09-30 03:22:22,428 INFO: Message received via WebSocket: adbc
+2024-09-30 04:18:17,227 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 04:18:17,228 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 04:18:17,228 INFO:  * Restarting with stat
+2024-09-30 04:18:17,864 WARNING:  * Debugger is active!
+2024-09-30 04:18:17,881 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 04:19:32,110 INFO: Client connected via WebSocket
+2024-09-30 04:19:47,158 INFO: Message received via WebSocket: hello

@@ -8,6 +8,8 @@ from dotenv import load_dotenv # type: ignore
 from openai.error import OpenAIError # type: ignore
 from flask_limiter import Limiter # type: ignore
 from flask_limiter.util import get_remote_address # type: ignore
+from flask_sqlalchemy import SQLAlchemy  # type: ignore
+from datetime import datetime
 
 # Load environment variables from .env
 load_dotenv()
@@ -26,12 +28,17 @@ logging.basicConfig(
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Set Flask session secret key
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///spokesperson.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Enable CORS
 CORS(app)
 
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# Initialize the database
+db = SQLAlchemy(app)
 
 # Initialize Flask-SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -43,6 +50,24 @@ limiter = Limiter(
     default_limits=["5 per minute"]  # Limit to 5 API calls per minute per IP address
 )
 
+
+# Models for User and ConversationLog
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+class ConversationLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    user = db.relationship('User', backref=db.backref('conversations', lazy=True))
+
+# Create all database tables
+with app.app_context():
+    db.create_all()
+    
 
 # Root route for basic testing
 @app.route('/')
@@ -111,9 +136,13 @@ CONVERSATION_FLOW = [
 @limiter.limit("3 per minute")  # Apply a specific rate limit for starting a conversation
 def start_conversation():
     try:
-        # Reset the conversation state and step counter
-        session['conversation'] = []
-        session['step'] = 0
+        # Create a new user profile (for demo purposes, username is hardcoded)
+        new_user = User(username="DemoUser")
+        db.session.add(new_user)
+        db.session.commit()
+
+        # Store user ID in session
+        session['user_id'] = new_user.id
 
         # Return the first question to the user
         first_question = CONVERSATION_FLOW[0]
@@ -136,6 +165,17 @@ def generate_response():
         if not user_input:
             app.logger.warning("No user input provided in /generate_response")
             return jsonify({"error": "No user input provided."}), 400
+        
+        # Retrieve the user ID
+        user_id = session.get('user_id')
+        if not user_id:
+            app.logger.error("User ID not found in session")
+            return jsonify({"error": "User session is not active."}), 400
+
+        # Store the user response in the database
+        new_message = ConversationLog(user_id=user_id, message=user_input)
+        db.session.add(new_message)
+        db.session.commit()
 
         app.logger.info(f"User Input Received: {user_input}")
 
