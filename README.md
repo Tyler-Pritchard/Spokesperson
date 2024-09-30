@@ -60,9 +60,3 @@ The online dating industry is experiencing user fatigue due to perceived inauthe
 Invest in a transformative platform that reimagines how people connect online. By harnessing the power of AI, this project offers an exciting opportunity to lead the evolution of the online dating industry, creating meaningful and entertaining experiences that resonate with today's users.
 
 For more information and to explore collaboration opportunities, please visit the repository or contact us directly.
-
-## Technology Stack
-- **Frontend**: React Native for user interface and experience.
-- **Backend**: Flask for quick, asynchronous handling of API requests.
-- **AI Integration**: OpenAI GPT-4 for conversation generation and simulated interactions.
-
