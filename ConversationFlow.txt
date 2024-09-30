@@ -1,7 +1,3 @@
-Certainly! Based on your inputs, I've crafted a detailed conversation flow for your AI Facilitator. This flow includes the introduction, questions, transitions, and closing remarks, all tailored to capture the essential user attributes for your demo application.
-
----
-
 ## **AI Facilitator Conversation Flow**
 
 ---
@@ -305,5 +301,3 @@ With this conversation flow, you can now proceed to implement it in your applica
 - **Backend:** Set up the logic to handle the conversation flow, store user responses, and prepare data for the Spokesperson generation.
 
 - **Integration with GPT-4:** Use the collected data to craft prompts that generate personalized interactions.
-
-If you need assistance with the coding aspects or further guidance on integrating this conversation flow into your application, feel free to ask!
