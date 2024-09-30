@@ -1,10 +1,19 @@
 import os
+import logging
 import openai
 from flask import Flask, jsonify
 from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
+
+# Set up logging
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+
+logging.basicConfig(filename='logs/app.log',
+                    level=logging.DEBUG,
+                    format='%(asctime)s %(levelname)s: %(message)s')
 
 # Initialize Flask app
 app = Flask(__name__)
