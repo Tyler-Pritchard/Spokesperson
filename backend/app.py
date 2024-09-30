@@ -1,11 +1,12 @@
 import os
 import logging
-import openai
-from flask import Flask, jsonify, request, session
-from dotenv import load_dotenv
-from openai.error import OpenAIError
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+import openai # type: ignore
+from flask import Flask, jsonify, request, session # type: ignore
+from flask_socketio import SocketIO, emit # type: ignore
+from dotenv import load_dotenv # type: ignore
+from openai.error import OpenAIError # type: ignore
+from flask_limiter import Limiter # type: ignore
+from flask_limiter.util import get_remote_address # type: ignore
 
 # Load environment variables from .env
 load_dotenv()
@@ -27,6 +28,9 @@ app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Set Flask sess
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Initialize Flask-SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
+
 # Set up rate limiter
 limiter = Limiter(
     get_remote_address,
@@ -34,42 +38,52 @@ limiter = Limiter(
     default_limits=["5 per minute"]  # Limit to 5 API calls per minute per IP address
 )
 
+
 # Root route for basic testing
 @app.route('/')
 def index():
     app.logger.info("Index route accessed")
     return jsonify({"message": "Welcome to the Spokesperson App!"})
 
-# Existing test route to verify OpenAI connection
+
+# WebSocket event handler for client connections
+@socketio.on('connect')
+def handle_connect():
+    app.logger.info("Client connected")
+    emit('response', {'message': 'Welcome! You are now connected to the server.'})
+
+# WebSocket event handler for receiving messages
+@socketio.on('message')
+def handle_message(data):
+    app.logger.info(f"Message received: {data}")
+    emit('response', {'message': f"Server received: {data}"}, broadcast=True)
+
+# WebSocket event handler for disconnection
+@socketio.on('disconnect')
+def handle_disconnect():
+    app.logger.info("Client disconnected")
+
+# Define a simple test route for OpenAI
 @app.route('/test_openai')
-@limiter.limit("2 per minute")  # Limit the number of test requests
 def test_openai():
     try:
-        # Create a simple message list to pass to ChatCompletion
         messages = [
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": "What is the capital of France?"}
         ]
-
-        # Call OpenAI's ChatCompletion API using the correct syntax
         response = openai.ChatCompletion.create(
-            model="gpt-4o",
+            model="gpt-3.5-turbo",
             messages=messages,
             max_tokens=50
         )
-
-        # Extract the response from the ChatCompletion
         answer = response['choices'][0]['message']['content'].strip()
         app.logger.info(f"OpenAI Response: {answer}")
         return jsonify({"prompt": "What is the capital of France?", "response": answer})
-
-    except OpenAIError as oe:
-        app.logger.error(f"OpenAI API Error: {str(oe)}")
-        return jsonify({"error": "OpenAI API request failed. Please try again later."}), 500
     except Exception as e:
-        app.logger.error(f"Unexpected error in /test_openai: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
-
+        app.logger.error(f"Error in test_openai: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+    
+    
 # Define a list of questions for the conversation flow
 CONVERSATION_FLOW = [
     "What's your favorite hobby?",
@@ -163,5 +177,6 @@ def generate_response():
         app.logger.error(f"Unexpected error in /generate_response: {str(e)}")
         return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
     
+# Start the Flask-SocketIO server
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app, debug=True)

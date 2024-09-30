@@ -58,3 +58,15 @@
 2024-09-29 20:53:17,773 INFO: User Input Received: I enjoy hiking.
 2024-09-29 20:53:17,773 INFO: Current step: 1, Next question: Do you prefer the mountains or the beach?
 2024-09-29 20:53:17,773 INFO: 127.0.0.1 - - [29/Sep/2024 20:53:17] "POST /generate_response HTTP/1.1" 200 -
+2024-09-30 02:42:13,203 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-30 02:42:13,204 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 02:42:13,204 INFO:  * Restarting with stat
+2024-09-30 02:42:13,708 WARNING:  * Debugger is active!
+2024-09-30 02:42:13,733 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 02:49:57,695 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-30 02:49:57,696 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 02:49:57,696 INFO:  * Restarting with stat
+2024-09-30 02:49:58,180 WARNING:  * Debugger is active!
+2024-09-30 02:49:58,207 INFO:  * Debugger PIN: 981-007-552
