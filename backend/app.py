@@ -1,5 +1,6 @@
 import os
 import logging
+from flask_cors import CORS # type: ignore
 import openai # type: ignore
 from flask import Flask, jsonify, request, session # type: ignore
 from flask_socketio import SocketIO, emit # type: ignore
@@ -10,6 +11,7 @@ from flask_limiter.util import get_remote_address # type: ignore
 
 # Load environment variables from .env
 load_dotenv()
+
 
 # Set up logging
 if not os.path.exists('logs'):
@@ -24,6 +26,9 @@ logging.basicConfig(
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Set Flask session secret key
+
+# Enable CORS
+CORS(app)
 
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -49,19 +54,27 @@ def index():
 # WebSocket event handler for client connections
 @socketio.on('connect')
 def handle_connect():
-    app.logger.info("Client connected")
+    app.logger.info("Client connected via WebSocket")
+    print("Client connected via WebSocket")  # Print for quick visibility
     emit('response', {'message': 'Welcome! You are now connected to the server.'})
 
 # WebSocket event handler for receiving messages
 @socketio.on('message')
 def handle_message(data):
-    app.logger.info(f"Message received: {data}")
+    app.logger.info(f"Message received via WebSocket: {data}")
+    print(f"Message received via WebSocket: {data}")  # Print for quick visibility
     emit('response', {'message': f"Server received: {data}"}, broadcast=True)
 
 # WebSocket event handler for disconnection
 @socketio.on('disconnect')
 def handle_disconnect():
-    app.logger.info("Client disconnected")
+    app.logger.info("Client disconnected from WebSocket")
+    print("Client disconnected from WebSocket")  # Print to console for quick visibility
+    
+@socketio.on_error()        # Handles any uncaught errors in SocketIO
+def error_handler(e):
+    app.logger.error(f"SocketIO Error: {str(e)}")
+
 
 # Define a simple test route for OpenAI
 @app.route('/test_openai')
@@ -179,4 +192,4 @@ def generate_response():
     
 # Start the Flask-SocketIO server
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True)

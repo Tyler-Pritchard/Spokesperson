@@ -70,3 +70,36 @@
 2024-09-30 02:49:57,696 INFO:  * Restarting with stat
 2024-09-30 02:49:58,180 WARNING:  * Debugger is active!
 2024-09-30 02:49:58,207 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 02:56:38,566 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-30 02:56:38,567 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 02:56:38,567 INFO:  * Restarting with stat
+2024-09-30 02:56:39,133 WARNING:  * Debugger is active!
+2024-09-30 02:56:39,151 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 03:04:43,434 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-30 03:04:43,435 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 03:04:43,435 INFO:  * Restarting with stat
+2024-09-30 03:04:43,875 WARNING:  * Debugger is active!
+2024-09-30 03:04:43,895 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 03:11:10,063 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/app.py', reloading
+2024-09-30 03:11:10,145 INFO:  * Restarting with stat
+2024-09-30 03:11:10,588 WARNING:  * Debugger is active!
+2024-09-30 03:11:10,607 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 03:12:30,844 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-30 03:12:30,844 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 03:12:30,844 INFO:  * Restarting with stat
+2024-09-30 03:12:31,347 WARNING:  * Debugger is active!
+2024-09-30 03:12:31,354 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 03:21:18,077 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 03:21:18,078 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 03:21:18,078 INFO:  * Restarting with stat
+2024-09-30 03:21:18,540 WARNING:  * Debugger is active!
+2024-09-30 03:21:18,546 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 03:22:08,055 INFO: Client connected via WebSocket
+2024-09-30 03:22:17,800 INFO: Message received via WebSocket: app.logger.info
+2024-09-30 03:22:22,428 INFO: Message received via WebSocket: adbc

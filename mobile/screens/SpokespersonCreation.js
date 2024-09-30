@@ -1,12 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, FlatList } from 'react-native';
+import io from 'socket.io-client';
 
 export default function SpokespersonCreation({ navigation }) {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    // Initialize WebSocket connection to the server
+    const socket = io("http://10.0.0.50:5000", {
+      transports: ["websocket"],
+      reconnectionAttempts: 5,
+      timeout: 20000,
+      reconnectionDelayMax: 10000,
+    });
+    setSocket(socket);
+
+    socket.on('connect_error', (err) => {
+      console.error("Connection Error:", err);
+    });    
+
+    // Listen for incoming messages from the server
+    socket.on("message", (message) => {
+      setMessages((prevMessages) => [...prevMessages, { id: prevMessages.length.toString(), text: message }]);
+    });
+
+    // Clean up when the component is unmounted
+    return () => socket.disconnect();
+  }, []);
 
   const handleSend = () => {
     if (inputText.trim()) {
+      // Send the input text as a message to the server
+      socket.emit("message", inputText);
       setMessages([...messages, { id: messages.length.toString(), text: inputText }]);
       setInputText('');
     }

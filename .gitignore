@@ -1,2 +1,38 @@
+# Global ignores for the root directory
+.DS_Store
+node_modules/
+logs/
+*.log
 .env
-/venv
+.vscode/
+*.swp
+.idea/
+
+# Backend-specific ignores (if using Flask or Node.js)
+backend/__pycache__/
+backend/*.py[cod]
+backend/.venv/
+backend/venv/
+backend/.pytest_cache/
+backend/*.sqlite3
+backend/.coverage
+
+# Ignore compiled Python files
+backend/**/*.pyc
+backend/.mypy_cache/
+backend/.pylint.d/
+
+# Mobile-specific ignores (React Native/Expo)
+mobile/.expo/
+mobile/.expo-shared/
+mobile/.DS_Store
+mobile/node_modules/
+mobile/build/
+mobile/.bundle/
+mobile/.gradle/
+mobile/.idea/
+mobile/.vscode/
+mobile/android/
+mobile/ios/
+mobile/web-build/
+mobile/package-lock.json
