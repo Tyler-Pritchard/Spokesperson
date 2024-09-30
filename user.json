@@ -1,0 +1,20 @@
+{
+    "user_id": "unique_user_identifier",
+    "interests": ["hiking", "photography", "live music"],
+    "personality_traits": {
+      "adventurous": true,
+      "optimistic": true,
+      "independent": true
+    },
+    "communication_style": {
+      "humor": true,
+      "casual_tone": true,
+      "expressiveness": true
+    },
+    "values": ["personal_growth", "environmentalism", "social_justice"],
+    "date_preferences": {
+      "settings": ["outdoor_adventures", "artistic_venues"],
+      "atmosphere": "exciting_and_memorable"
+    },
+    "additional_details": "Fun fact or unique personal anecdote"
+  }
