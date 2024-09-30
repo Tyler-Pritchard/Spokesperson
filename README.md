@@ -75,6 +75,7 @@ Follow the steps below to set up and run the project.
 - OpenAI API Key
 
 ## Project Structure
+```
 Spokesperson/
 ├── venv/                  # Virtual environment directory (not tracked in version control)
 ├── .env.example           # Example environment configuration
@@ -96,7 +97,7 @@ Spokesperson/
 ├── src/                   # Source files for additional modules
 │   └── ai_module.py       # AI integration logic
 └── setup.sh               # Setup script to automate environment configuration
-
+```
 
 
 ### Installation
