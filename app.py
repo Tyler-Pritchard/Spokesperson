@@ -3,6 +3,7 @@ import logging
 import openai
 from flask import Flask, jsonify, request, session
 from dotenv import load_dotenv
+from openai.error import OpenAIError
 
 # Load environment variables from .env
 load_dotenv()
@@ -52,9 +53,12 @@ def test_openai():
         app.logger.info(f"OpenAI Response: {answer}")
         return jsonify({"prompt": "What is the capital of France?", "response": answer})
 
+    except OpenAIError as oe:
+        app.logger.error(f"OpenAI API Error: {str(oe)}")
+        return jsonify({"error": "OpenAI API request failed. Please try again later."}), 500
     except Exception as e:
-        app.logger.error(f"Error in test_openai: {str(e)}")
-        return jsonify({"error": str(e)})
+        app.logger.error(f"Unexpected error in /test_openai: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
 
 # Define a list of questions for the conversation flow
 CONVERSATION_FLOW = [
@@ -68,14 +72,19 @@ CONVERSATION_FLOW = [
 # Route for starting a new conversation
 @app.route('/start_conversation', methods=['POST'])
 def start_conversation():
-    # Reset the conversation state and step counter
-    session['conversation'] = []
-    session['step'] = 0
+    try:
+        # Reset the conversation state and step counter
+        session['conversation'] = []
+        session['step'] = 0
 
-    # Return the first question to the user
-    first_question = CONVERSATION_FLOW[0]
-    app.logger.info("Starting new conversation. First question: " + first_question)
-    return jsonify({"message": first_question})
+        # Return the first question to the user
+        first_question = CONVERSATION_FLOW[0]
+        app.logger.info("Starting new conversation. First question: " + first_question)
+        return jsonify({"message": first_question})
+
+    except Exception as e:
+        app.logger.error(f"Error starting conversation: {str(e)}")
+        return jsonify({"error": "Failed to start a new conversation. Please try again."}), 500
 
 
 # Route to process user input and manage conversation flow
@@ -136,10 +145,12 @@ def generate_response():
             # Return the AI summary as JSON
             return jsonify({"user_input": user_input, "summary": ai_response})
 
+    except OpenAIError as oe:
+        app.logger.error(f"OpenAI API Error: {str(oe)}")
+        return jsonify({"error": "OpenAI API request failed. Please try again later."}), 500
     except Exception as e:
-        # Handle exceptions and return error messages
-        app.logger.error(f"Error in /generate_response: {str(e)}")
-        return jsonify({"error": str(e)}), 500
+        app.logger.error(f"Unexpected error in /generate_response: {str(e)}")
+        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
     
 if __name__ == '__main__':
     app.run(debug=True)
