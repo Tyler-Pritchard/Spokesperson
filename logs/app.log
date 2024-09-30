@@ -45,3 +45,16 @@
 2024-09-29 20:44:29,968 INFO: User Input Received: I enjoy hiking.
 2024-09-29 20:44:29,968 INFO: Current step: 1, Next question: Do you prefer the mountains or the beach?
 2024-09-29 20:44:29,969 INFO: 127.0.0.1 - - [29/Sep/2024 20:44:29] "POST /generate_response HTTP/1.1" 200 -
+2024-09-29 20:49:35,584 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/app.py', reloading
+2024-09-29 20:49:35,653 INFO:  * Restarting with stat
+2024-09-29 20:52:59,957 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-29 20:52:59,957 INFO: [33mPress CTRL+C to quit[0m
+2024-09-29 20:52:59,958 INFO:  * Restarting with stat
+2024-09-29 20:53:00,364 WARNING:  * Debugger is active!
+2024-09-29 20:53:00,384 INFO:  * Debugger PIN: 468-085-474
+2024-09-29 20:53:12,252 INFO: Starting new conversation. First question: What's your favorite hobby?
+2024-09-29 20:53:12,253 INFO: 127.0.0.1 - - [29/Sep/2024 20:53:12] "POST /start_conversation HTTP/1.1" 200 -
+2024-09-29 20:53:17,773 INFO: User Input Received: I enjoy hiking.
+2024-09-29 20:53:17,773 INFO: Current step: 1, Next question: Do you prefer the mountains or the beach?
+2024-09-29 20:53:17,773 INFO: 127.0.0.1 - - [29/Sep/2024 20:53:17] "POST /generate_response HTTP/1.1" 200 -

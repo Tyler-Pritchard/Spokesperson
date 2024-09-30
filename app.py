@@ -4,6 +4,8 @@ import openai
 from flask import Flask, jsonify, request, session
 from dotenv import load_dotenv
 from openai.error import OpenAIError
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Load environment variables from .env
 load_dotenv()
@@ -25,6 +27,13 @@ app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Set Flask sess
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+# Set up rate limiter
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=["5 per minute"]  # Limit to 5 API calls per minute per IP address
+)
+
 # Root route for basic testing
 @app.route('/')
 def index():
@@ -33,6 +42,7 @@ def index():
 
 # Existing test route to verify OpenAI connection
 @app.route('/test_openai')
+@limiter.limit("2 per minute")  # Limit the number of test requests
 def test_openai():
     try:
         # Create a simple message list to pass to ChatCompletion
@@ -43,7 +53,7 @@ def test_openai():
 
         # Call OpenAI's ChatCompletion API using the correct syntax
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Use "gpt-4" if you have access to GPT-4
+            model="gpt-4o",
             messages=messages,
             max_tokens=50
         )
@@ -71,6 +81,7 @@ CONVERSATION_FLOW = [
 
 # Route for starting a new conversation
 @app.route('/start_conversation', methods=['POST'])
+@limiter.limit("3 per minute")  # Apply a specific rate limit for starting a conversation
 def start_conversation():
     try:
         # Reset the conversation state and step counter
