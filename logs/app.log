@@ -4,3 +4,18 @@
 2024-09-29 19:55:07,708 INFO:  * Restarting with stat
 2024-09-29 19:55:08,065 WARNING:  * Debugger is active!
 2024-09-29 19:55:08,082 INFO:  * Debugger PIN: 468-085-474
+2024-09-29 20:06:33,451 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-09-29 20:06:33,451 INFO: [33mPress CTRL+C to quit[0m
+2024-09-29 20:06:33,452 INFO:  * Restarting with stat
+2024-09-29 20:06:33,806 WARNING:  * Debugger is active!
+2024-09-29 20:06:33,832 INFO:  * Debugger PIN: 468-085-474
+2024-09-29 20:06:48,276 INFO: User Input Received: Tell me a fun fact about animals.
+2024-09-29 20:06:48,293 DEBUG: message='Request to OpenAI API' method=post path=https://api.openai.com/v1/chat/completions
+2024-09-29 20:06:48,294 DEBUG: api_version=None data='{"model": "gpt-3.5-turbo", "messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Tell me a fun fact about animals."}], "max_tokens": 100}' message='Post details'
+2024-09-29 20:06:48,294 DEBUG: Converted retries value: 2 -> Retry(total=2, connect=None, read=None, redirect=None, status=None)
+2024-09-29 20:06:48,301 DEBUG: Starting new HTTPS connection (1): api.openai.com:443
+2024-09-29 20:06:49,349 DEBUG: https://api.openai.com:443 "POST /v1/chat/completions HTTP/11" 200 None
+2024-09-29 20:06:49,350 DEBUG: message='OpenAI API response' path=https://api.openai.com/v1/chat/completions processing_ms=813 request_id=req_1026d5b7ea2daca13937aa15400d863f response_code=200
+2024-09-29 20:06:49,351 INFO: Generated AI Response: Sure! Did you know that a group of flamingos is called a "flamboyance"? These colorful birds certainly live up to their name when they gather together in large numbers!
+2024-09-29 20:06:49,352 INFO: 127.0.0.1 - - [29/Sep/2024 20:06:49] "POST /generate_response HTTP/1.1" 200 -
