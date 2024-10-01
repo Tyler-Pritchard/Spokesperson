@@ -16,19 +16,20 @@ export default function SpokespersonCreation({ navigation }) {
       reconnectionDelayMax: 10000,
     });
     setSocket(socket);
-
+  
     socket.on('connect_error', (err) => {
       console.error("Connection Error:", err);
-    });    
-
-    // Listen for incoming messages from the server
-    socket.on("message", (message) => {
-      setMessages((prevMessages) => [...prevMessages, { id: prevMessages.length.toString(), text: message }]);
     });
-
+  
+    // Listen for incoming messages from the server
+    socket.on("response", (message) => {
+      console.log("Received message from server:", message);
+      setMessages((prevMessages) => [...prevMessages, { id: prevMessages.length.toString(), text: message.message }]);
+    });
+  
     // Clean up when the component is unmounted
     return () => socket.disconnect();
-  }, []);
+  }, []);  
 
   const handleSend = () => {
     if (inputText.trim()) {
