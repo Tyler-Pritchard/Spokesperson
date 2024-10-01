@@ -89,22 +89,57 @@ def index():
 @socketio.on('connect')
 def handle_connect():
     app.logger.info("Client connected via WebSocket")
-    print("Client connected via WebSocket")  # Print for quick visibility
+    print("Client connected via WebSocket")
+
+    # Set a default user ID for the session if not set (for demo purposes)
+    if 'user_id' not in session:
+        session['user_id'] = 1  # Hardcode for testing/demo purposes
+        app.logger.info("User ID set to 1 for session.")
+    
     emit('response', {'message': 'Welcome! You are now connected to the server.'})
+
+    
+    
+# Function to generate a dynamic response for the Facilitator
+def generate_facilitator_response(user_id):
+    # Retrieve the previous conversation messages for this user
+    conversation_logs = ConversationLog.query.filter_by(user_id=user_id).order_by(ConversationLog.timestamp).all()
+    conversation_text = "\n".join([f"User: {log.message}" for log in conversation_logs])
+
+    # Prepare the prompt for GPT-3
+    prompt = (
+        f"You are a helpful AI Facilitator guiding a user to build a personalized chatbot profile. "
+        f"Based on the conversation so far, ask a relevant follow-up question or provide insightful commentary.\n\n"
+        f"Previous Conversation:\n{conversation_text}\n\n"
+        f"Facilitator: "
+    )
+
+    # Generate a response using OpenAI
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=100,
+            n=1,
+            stop=["User:"]
+        )
+        facilitator_response = response.choices[0].text.strip()
+        return facilitator_response
+    except OpenAIError as oe:
+        app.logger.error(f"OpenAI API Error: {str(oe)}")
+        return "Sorry, I'm having trouble generating a response. Please try again."
+
 
 # WebSocket event handler for receiving messages
 @socketio.on('message')
 def handle_message(data):
     app.logger.info(f"Message received via WebSocket: {data}")
-    print(f"Message received via WebSocket: {data}")  # Print for quick visibility
+    print(f"Message received via WebSocket: {data}")
 
-    # Log the session data to verify the user ID is present
-    app.logger.info(f"Session Data: {session}")
-    user_id = 1
-    print(f"User ID from session: {user_id}")
-    
+    # Retrieve the user ID from the session
+    user_id = session.get('user_id')
     if not user_id:
-        app.logger.error("User ID not found in session")
+        app.logger.error("User ID not found in session during WebSocket message handling.")
         emit('response', {'message': 'Error: User session is not active.'})
         return
 
@@ -121,8 +156,8 @@ def handle_message(data):
         emit('response', {'message': 'Error saving message to the database.'})
         return
 
-    # Emit a response back to the client
-    emit('response', {'message': f"Server received and saved: {data}"}, broadcast=True)
+    # Emit a structured response back to the client
+    emit('response', {'message': {"id": str(new_message.id), "message": new_message.message}}, broadcast=True)
 
 
 # WebSocket event handler for disconnection
@@ -168,26 +203,25 @@ CONVERSATION_FLOW = [
 ]
 
 
+
 @app.route('/get_conversation', methods=['GET'])
 def get_conversation():
+    # user_id = session.get('user_id')
+    user_id = 1
+    if not user_id:
+        app.logger.error("User session is not active.")
+        return jsonify({"error": "User session is not active."}), 400
+
     try:
-        app.logger.info(f"Session data: {session}")  # Log the session data
-        user_id = session.get('user_id', 1)
-        app.logger.info(f"Using User ID: {user_id}")
-
-        if not user_id:
-            app.logger.error("User ID not found in session")
-            return jsonify({"error": "User session is not active."}), 400
-
-        # Query the database for the conversation history of this user
-        conversation = ConversationLog.query.filter_by(user_id=user_id).all()
-        messages = [{"id": log.id, "message": log.message, "timestamp": log.timestamp.isoformat()} for log in conversation]
-
-        return jsonify({"messages": messages})
-
+        conversation_logs = ConversationLog.query.filter_by(user_id=user_id).all()
+        messages = [{"id": str(index), "message": log.message} for index, log in enumerate(conversation_logs)]
+        app.logger.info(f"Conversation history for user {user_id}: {messages}")
+        return jsonify({"conversation": messages})
     except Exception as e:
-        app.logger.error(f"Error fetching conversation history: {str(e)}")
-        return jsonify({"error": "Failed to fetch conversation history."}), 500
+        app.logger.error(f"Error retrieving conversation: {str(e)}")
+        return jsonify({"error": "Failed to retrieve conversation history."}), 500
+
+
 
 
 @app.route('/start_conversation', methods=['POST'])
@@ -255,9 +289,11 @@ def generate_response():
         if not user_input:
             app.logger.warning("No user input provided in /generate_response")
             return jsonify({"error": "No user input provided."}), 400
-        
-        # Retrieve the user ID
-        user_id = session.get('user_id')
+
+        # Retrieve the user ID - Hardcoding for now to test
+        user_id = 1
+        # Uncomment the following to use session value once session is fixed
+        # user_id = session.get('user_id')
         if not user_id:
             app.logger.error("User ID not found in session")
             return jsonify({"error": "User session is not active."}), 400
@@ -271,19 +307,14 @@ def generate_response():
 
         app.logger.info(f"User Input Received: {user_input}")
 
-        # Retrieve the current step from the session
-        current_step = session.get('step', 0)
-
-        # Store the user's response in the conversation history
-        conversation = session.get('conversation', [])
-        conversation.append({"role": "user", "content": user_input})
-        session['conversation'] = conversation
+        # Retrieve the current step from the session or use 0 as default
+        current_step = 0
 
         # If we are still within the predefined questions, move to the next one
         if current_step < len(CONVERSATION_FLOW) - 1:
             next_step = current_step + 1
             next_question = CONVERSATION_FLOW[next_step]
-            session['step'] = next_step
+            current_step = next_step
 
             # Log the current state
             app.logger.info(f"Current step: {next_step}, Next question: {next_question}")
@@ -295,7 +326,7 @@ def generate_response():
             # If the predefined questions are completed, generate an AI summary
             messages = [
                 {"role": "system", "content": "You are a helpful assistant."}
-            ] + [{"role": "user", "content": entry['content']} for entry in conversation]
+            ] + [{"role": "user", "content": user_input}]
 
             # Generate a summary using OpenAI's ChatCompletion API
             response = openai.ChatCompletion.create(
@@ -303,10 +334,12 @@ def generate_response():
                 messages=messages,
                 max_tokens=150
             )
+            print(f"OpenAI Response: {response}")
 
             # Extract the AI's response from the result
             ai_response = response['choices'][0]['message']['content'].strip()
             app.logger.info(f"Generated AI Summary: {ai_response}")
+            emit('response', {'message': f"Facilitator says: {ai_response}"}, broadcast=True)
 
             # Reset conversation state after completion
             session.pop('conversation', None)
@@ -321,6 +354,7 @@ def generate_response():
     except Exception as e:
         app.logger.error(f"Unexpected error in /generate_response: {str(e)}")
         return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+
     
 # Start the Flask-SocketIO server
 if __name__ == '__main__':

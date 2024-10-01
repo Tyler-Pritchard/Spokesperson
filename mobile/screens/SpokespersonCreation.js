@@ -8,7 +8,6 @@ export default function SpokespersonCreation({ navigation }) {
   const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    // Initialize WebSocket connection to the server
     const socket = io("http://10.0.0.50:5000", {
       transports: ["websocket"],
       reconnectionAttempts: 5,
@@ -17,38 +16,49 @@ export default function SpokespersonCreation({ navigation }) {
     });
     setSocket(socket);
 
-    // Load conversation history from the server when the component mounts
-    fetch("http://10.0.0.50:5000/get_conversation")
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.messages) {
-          const formattedMessages = data.messages.map((msg) => ({ id: msg.id.toString(), text: msg.message }));
-          setMessages(formattedMessages);
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching conversation history:", error);
-      });
+    socket.on('connect', () => {
+      console.log("Connected to WebSocket server");
 
-    socket.on('connect_error', (err) => {
-      console.error("Connection Error:", err);
+      // Fetch conversation history from the backend
+      fetch('http://10.0.0.50:5000/generate_response', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user_input: "Your sample input here" }),
+      })
+        .then((response) => response.json())
+        .then((data) => console.log("Response from /generate_response: ", data))
+        .catch((error) => console.error("Error calling /generate_response: ", error));      
     });
 
     // Listen for incoming messages from the server
-    socket.on("response", (message) => {
-      console.log("Received message from server:", message);
-      setMessages((prevMessages) => [...prevMessages, { id: prevMessages.length.toString(), text: message.message }]);
+    socket.on("message", (message) => {
+      console.log("Message received from server: ", message);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { id: prevMessages.length.toString(), message }  // Keep the 'message' key to match the backend
+      ]);
     });
 
-    // Clean up when the component is unmounted
-    return () => socket.disconnect();
+    socket.on("response", (data) => {
+      console.log("AI Response received from server: ", data.message);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { id: prevMessages.length.toString(), message: data.message }  // Append AI message
+      ]);
+    });    
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const handleSend = () => {
     if (inputText.trim()) {
       // Send the input text as a message to the server
       socket.emit("message", inputText);
-      setMessages([...messages, { id: messages.length.toString(), text: inputText }]);
+      setMessages([...messages, { id: messages.length.toString(), message: inputText }]);  // Correct the key here
       setInputText('');
     }
   };
@@ -58,7 +68,9 @@ export default function SpokespersonCreation({ navigation }) {
       <Text style={styles.title}>Spokesperson Creation</Text>
       <FlatList
         data={messages}
-        renderItem={({ item }) => <Text style={styles.message}>{item.text}</Text>}
+        renderItem={({ item }) => (
+          <Text style={styles.message}>{item.message}</Text>  // Use 'item.message' instead of passing the whole object
+        )}
         keyExtractor={(item) => item.id}
         style={styles.messageList}
       />
