@@ -421,3 +421,182 @@ Traceback (most recent call last):
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 AssertionError: write() before start_response
 2024-09-30 22:08:46,889 INFO: Client connected via WebSocket
+2024-09-30 22:29:06,222 INFO: BEGIN (implicit)
+2024-09-30 22:29:06,222 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:29:06,222 INFO: [raw sql] ()
+2024-09-30 22:29:06,223 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:29:06,223 INFO: [raw sql] ()
+2024-09-30 22:29:06,224 INFO: COMMIT
+2024-09-30 22:29:06,406 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 22:29:06,406 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 22:29:06,406 INFO:  * Restarting with stat
+2024-09-30 22:29:07,067 INFO: BEGIN (implicit)
+2024-09-30 22:29:07,067 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:29:07,067 INFO: [raw sql] ()
+2024-09-30 22:29:07,068 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:29:07,068 INFO: [raw sql] ()
+2024-09-30 22:29:07,068 INFO: COMMIT
+2024-09-30 22:29:07,083 WARNING:  * Debugger is active!
+2024-09-30 22:29:07,103 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:29:21,514 INFO: Client connected via WebSocket
+2024-09-30 22:34:30,770 INFO: Message received via WebSocket: ja rule
+2024-09-30 22:34:30,770 INFO: Session Data: <SecureCookieSession {}>
+2024-09-30 22:34:30,780 INFO: BEGIN (implicit)
+2024-09-30 22:34:30,783 INFO: INSERT INTO conversation_log (user_id, message, timestamp) VALUES (?, ?, ?)
+2024-09-30 22:34:30,783 INFO: [generated in 0.00057s] (1, 'ja rule', '2024-10-01 05:34:30.783099')
+2024-09-30 22:34:30,784 INFO: COMMIT
+2024-09-30 22:34:30,787 INFO: BEGIN (implicit)
+2024-09-30 22:34:30,792 INFO: SELECT conversation_log.id AS conversation_log_id, conversation_log.user_id AS conversation_log_user_id, conversation_log.message AS conversation_log_message, conversation_log.timestamp AS conversation_log_timestamp 
+FROM conversation_log 
+WHERE conversation_log.id = ?
+2024-09-30 22:34:30,793 INFO: [generated in 0.00029s] (4,)
+2024-09-30 22:34:30,794 INFO: Message saved to database: <ConversationLog 4>
+2024-09-30 22:34:30,794 INFO: ROLLBACK
+2024-09-30 22:42:04,010 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/app.py', reloading
+2024-09-30 22:42:04,197 INFO:  * Restarting with stat
+2024-09-30 22:42:05,058 INFO: BEGIN (implicit)
+2024-09-30 22:42:05,058 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:42:05,059 INFO: [raw sql] ()
+2024-09-30 22:42:05,060 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:42:05,060 INFO: [raw sql] ()
+2024-09-30 22:42:05,060 INFO: COMMIT
+2024-09-30 22:42:05,076 WARNING:  * Debugger is active!
+2024-09-30 22:42:05,100 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:42:05,144 INFO: Client connected via WebSocket
+2024-09-30 22:42:31,497 INFO: Client disconnected from WebSocket
+2024-09-30 22:42:31,523 INFO: 10.0.0.50 - - [30/Sep/2024 22:42:31] "[31m[1mGET /get_conversation HTTP/1.1[0m" 400 -
+2024-09-30 22:42:31,528 INFO: 10.0.0.50 - - [30/Sep/2024 22:42:31] "[35m[1mGET /socket.io/?EIO=4&transport=websocket HTTP/1.1[0m" 500 -
+2024-09-30 22:42:31,529 ERROR: Error on request:
+Traceback (most recent call last):
+  File "/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 370, in run_wsgi
+    execute(self.server.app)
+  File "/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 336, in execute
+    write(b"")
+  File "/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/venv/lib/python3.12/site-packages/werkzeug/serving.py", line 261, in write
+    assert status_set is not None, "write() before start_response"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: write() before start_response
+2024-09-30 22:42:31,532 INFO: Client connected via WebSocket
+2024-09-30 22:43:20,122 INFO: BEGIN (implicit)
+2024-09-30 22:43:20,123 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:43:20,123 INFO: [raw sql] ()
+2024-09-30 22:43:20,124 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:43:20,124 INFO: [raw sql] ()
+2024-09-30 22:43:20,124 INFO: COMMIT
+2024-09-30 22:43:20,344 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 22:43:20,344 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 22:43:20,344 INFO:  * Restarting with stat
+2024-09-30 22:43:21,118 INFO: BEGIN (implicit)
+2024-09-30 22:43:21,119 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:43:21,119 INFO: [raw sql] ()
+2024-09-30 22:43:21,120 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:43:21,120 INFO: [raw sql] ()
+2024-09-30 22:43:21,120 INFO: COMMIT
+2024-09-30 22:43:21,139 WARNING:  * Debugger is active!
+2024-09-30 22:43:21,148 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:43:23,563 INFO: Client connected via WebSocket
+2024-09-30 22:45:05,732 INFO: BEGIN (implicit)
+2024-09-30 22:45:05,732 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:45:05,733 INFO: [raw sql] ()
+2024-09-30 22:45:05,733 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:45:05,733 INFO: [raw sql] ()
+2024-09-30 22:45:05,734 INFO: COMMIT
+2024-09-30 22:45:05,755 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 22:45:05,755 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 22:45:05,755 INFO:  * Restarting with stat
+2024-09-30 22:45:06,454 INFO: BEGIN (implicit)
+2024-09-30 22:45:06,454 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:45:06,454 INFO: [raw sql] ()
+2024-09-30 22:45:06,455 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:45:06,455 INFO: [raw sql] ()
+2024-09-30 22:45:06,455 INFO: COMMIT
+2024-09-30 22:45:06,472 WARNING:  * Debugger is active!
+2024-09-30 22:45:06,481 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:45:35,042 INFO: 10.0.0.50 - - [30/Sep/2024 22:45:35] "[31m[1mGET /get_conversation HTTP/1.1[0m" 400 -
+2024-09-30 22:45:35,151 INFO: Client connected via WebSocket
+2024-09-30 22:46:32,021 INFO: Message received via WebSocket: you there
+2024-09-30 22:46:32,021 INFO: Session Data: <SecureCookieSession {}>
+2024-09-30 22:46:32,035 INFO: BEGIN (implicit)
+2024-09-30 22:46:32,038 INFO: INSERT INTO conversation_log (user_id, message, timestamp) VALUES (?, ?, ?)
+2024-09-30 22:46:32,038 INFO: [generated in 0.00034s] (1, 'you there', '2024-10-01 05:46:32.038362')
+2024-09-30 22:46:32,040 INFO: COMMIT
+2024-09-30 22:46:32,044 INFO: BEGIN (implicit)
+2024-09-30 22:46:32,048 INFO: SELECT conversation_log.id AS conversation_log_id, conversation_log.user_id AS conversation_log_user_id, conversation_log.message AS conversation_log_message, conversation_log.timestamp AS conversation_log_timestamp 
+FROM conversation_log 
+WHERE conversation_log.id = ?
+2024-09-30 22:46:32,048 INFO: [generated in 0.00041s] (5,)
+2024-09-30 22:46:32,049 INFO: Message saved to database: <ConversationLog 5>
+2024-09-30 22:46:32,049 INFO: ROLLBACK
+2024-09-30 22:48:34,236 INFO: 127.0.0.1 - - [30/Sep/2024 22:48:34] "[31m[1mGET /get_conversation HTTP/1.1[0m" 400 -
+2024-09-30 22:54:08,358 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/app.py', reloading
+2024-09-30 22:54:08,517 INFO:  * Restarting with stat
+2024-09-30 22:54:09,270 INFO: BEGIN (implicit)
+2024-09-30 22:54:09,270 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:54:09,270 INFO: [raw sql] ()
+2024-09-30 22:54:09,271 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:54:09,271 INFO: [raw sql] ()
+2024-09-30 22:54:09,271 INFO: COMMIT
+2024-09-30 22:54:09,287 WARNING:  * Debugger is active!
+2024-09-30 22:54:09,317 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:54:09,522 INFO: Client connected via WebSocket
+2024-09-30 22:56:59,395 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/app.py', reloading
+2024-09-30 22:56:59,536 INFO:  * Restarting with stat
+2024-09-30 22:57:00,222 INFO: BEGIN (implicit)
+2024-09-30 22:57:00,223 INFO: PRAGMA main.table_info("user")
+2024-09-30 22:57:00,223 INFO: [raw sql] ()
+2024-09-30 22:57:00,224 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 22:57:00,224 INFO: [raw sql] ()
+2024-09-30 22:57:00,224 INFO: COMMIT
+2024-09-30 22:57:00,238 WARNING:  * Debugger is active!
+2024-09-30 22:57:00,244 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 22:57:01,629 INFO: Client connected via WebSocket
+2024-09-30 23:00:00,130 INFO:  * Detected change in '/Users/tylerpritchard/Desktop/Projects/Spokesperson/spokesperson/backend/app.py', reloading
+2024-09-30 23:00:00,272 INFO:  * Restarting with stat
+2024-09-30 23:00:01,012 INFO: BEGIN (implicit)
+2024-09-30 23:00:01,012 INFO: PRAGMA main.table_info("user")
+2024-09-30 23:00:01,012 INFO: [raw sql] ()
+2024-09-30 23:00:01,013 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 23:00:01,013 INFO: [raw sql] ()
+2024-09-30 23:00:01,013 INFO: COMMIT
+2024-09-30 23:00:01,030 WARNING:  * Debugger is active!
+2024-09-30 23:00:01,037 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 23:00:01,774 INFO: Client connected via WebSocket
+2024-09-30 23:02:27,435 INFO: BEGIN (implicit)
+2024-09-30 23:02:27,435 INFO: PRAGMA main.table_info("user")
+2024-09-30 23:02:27,435 INFO: [raw sql] ()
+2024-09-30 23:02:27,436 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 23:02:27,436 INFO: [raw sql] ()
+2024-09-30 23:02:27,436 INFO: COMMIT
+2024-09-30 23:02:27,615 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.50:5000
+2024-09-30 23:02:27,615 INFO: [33mPress CTRL+C to quit[0m
+2024-09-30 23:02:27,615 INFO:  * Restarting with stat
+2024-09-30 23:02:28,342 INFO: BEGIN (implicit)
+2024-09-30 23:02:28,342 INFO: PRAGMA main.table_info("user")
+2024-09-30 23:02:28,343 INFO: [raw sql] ()
+2024-09-30 23:02:28,343 INFO: PRAGMA main.table_info("conversation_log")
+2024-09-30 23:02:28,343 INFO: [raw sql] ()
+2024-09-30 23:02:28,344 INFO: COMMIT
+2024-09-30 23:02:28,362 WARNING:  * Debugger is active!
+2024-09-30 23:02:28,385 INFO:  * Debugger PIN: 981-007-552
+2024-09-30 23:03:24,039 INFO: Session data: <FileSystemSession {'_permanent': True}>
+2024-09-30 23:03:24,039 INFO: Using User ID: 1
+2024-09-30 23:03:24,045 INFO: BEGIN (implicit)
+2024-09-30 23:03:24,048 INFO: SELECT conversation_log.id AS conversation_log_id, conversation_log.user_id AS conversation_log_user_id, conversation_log.message AS conversation_log_message, conversation_log.timestamp AS conversation_log_timestamp 
+FROM conversation_log 
+WHERE conversation_log.user_id = ?
+2024-09-30 23:03:24,049 INFO: [generated in 0.00032s] (1,)
+2024-09-30 23:03:24,051 INFO: ROLLBACK
+2024-09-30 23:03:24,051 INFO: 10.0.0.50 - - [30/Sep/2024 23:03:24] "GET /get_conversation HTTP/1.1" 200 -
+2024-09-30 23:03:24,119 INFO: Client connected via WebSocket

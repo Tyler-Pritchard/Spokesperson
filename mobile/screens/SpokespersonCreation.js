@@ -16,20 +16,33 @@ export default function SpokespersonCreation({ navigation }) {
       reconnectionDelayMax: 10000,
     });
     setSocket(socket);
-  
+
+    // Load conversation history from the server when the component mounts
+    fetch("http://10.0.0.50:5000/get_conversation")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.messages) {
+          const formattedMessages = data.messages.map((msg) => ({ id: msg.id.toString(), text: msg.message }));
+          setMessages(formattedMessages);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching conversation history:", error);
+      });
+
     socket.on('connect_error', (err) => {
       console.error("Connection Error:", err);
     });
-  
+
     // Listen for incoming messages from the server
     socket.on("response", (message) => {
       console.log("Received message from server:", message);
       setMessages((prevMessages) => [...prevMessages, { id: prevMessages.length.toString(), text: message.message }]);
     });
-  
+
     // Clean up when the component is unmounted
     return () => socket.disconnect();
-  }, []);  
+  }, []);
 
   const handleSend = () => {
     if (inputText.trim()) {

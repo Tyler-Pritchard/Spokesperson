@@ -9,6 +9,7 @@ from openai.error import OpenAIError # type: ignore
 from flask_limiter import Limiter # type: ignore
 from flask_limiter.util import get_remote_address # type: ignore
 from flask_sqlalchemy import SQLAlchemy  # type: ignore
+from flask_session import Session # type: ignore
 import sqlalchemy # type: ignore
 from datetime import datetime
 
@@ -30,6 +31,7 @@ sqlalchemy.echo = True
 
 # Initialize Flask app
 app = Flask(__name__)
+app.config['SESSION_TYPE'] = 'filesystem'
 app.secret_key = os.getenv("SECRET_KEY", "default_secret_key")  # Set Flask session secret key
 app.config['SESSION_COOKIE_SECURE'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///spokesperson.db'
@@ -47,6 +49,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 db = SQLAlchemy(app)
 
 # Initialize Flask-SocketIO
+Session(app)
 socketio = SocketIO(app, cors_allowed_origins="*", manage_session=False)
 
 # Set up rate limiter
@@ -163,6 +166,28 @@ CONVERSATION_FLOW = [
     "Are you more of a morning person or a night owl?",
     "If you could have dinner with any historical figure, who would it be?"
 ]
+
+
+@app.route('/get_conversation', methods=['GET'])
+def get_conversation():
+    try:
+        app.logger.info(f"Session data: {session}")  # Log the session data
+        user_id = session.get('user_id', 1)
+        app.logger.info(f"Using User ID: {user_id}")
+
+        if not user_id:
+            app.logger.error("User ID not found in session")
+            return jsonify({"error": "User session is not active."}), 400
+
+        # Query the database for the conversation history of this user
+        conversation = ConversationLog.query.filter_by(user_id=user_id).all()
+        messages = [{"id": log.id, "message": log.message, "timestamp": log.timestamp.isoformat()} for log in conversation]
+
+        return jsonify({"messages": messages})
+
+    except Exception as e:
+        app.logger.error(f"Error fetching conversation history: {str(e)}")
+        return jsonify({"error": "Failed to fetch conversation history."}), 500
 
 
 @app.route('/start_conversation', methods=['POST'])
