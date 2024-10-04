@@ -17,6 +17,7 @@ backend/.pytest_cache/
 backend/*.sqlite3
 backend/.coverage
 backend/test_openai.py
+spokesperson/backend/test_openai.py
 
 # Ignore compiled Python files
 backend/**/*.pyc
