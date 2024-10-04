@@ -58,7 +58,7 @@ socketio = SocketIO(app, cors_allowed_origins="*", manage_session=False)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    default_limits=["5 per minute"]  # Limit to 5 API calls per minute per IP address
+    default_limits=["20 per minute"],
 )
 
 
@@ -93,13 +93,13 @@ def handle_connect():
     app.logger.info("Client connected via WebSocket")
     print("Client connected via WebSocket")
 
-    # Set a default user ID for the session if not set (for demo purposes)
+    # Ensure session is correctly configured and persisted
     if 'user_id' not in session:
-        session['user_id'] = 1  # Hardcode for testing/demo purposes
+        session['user_id'] = 1  # For testing purposes
         app.logger.info("User ID set to 1 for session.")
+
     
     emit('response', {'id':'0', 'message': 'Welcome! You are now connected to the server.'})
-
     
     
 def generate_facilitator_response(user_id):
@@ -111,22 +111,20 @@ def generate_facilitator_response(user_id):
         # Debug: Log the conversation history
         app.logger.info(f"Conversation history for user {user_id}:\n{conversation_text}")
 
-        # Prepare the prompt for GPT-3
-        prompt = (
-            f"You are a helpful AI Facilitator guiding a user to build a personalized chatbot profile. "
-            f"Based on the conversation so far, ask a relevant follow-up question or provide insightful commentary.\n\n"
-            f"Previous Conversation:\n{conversation_text}\n\n"
-            f"Facilitator: "
-        )
+        # Prepare the message history for GPT-3.5-turbo
+        messages = [
+            {"role": "system", "content": "You are a helpful AI Facilitator guiding a user to build a personalized chatbot profile."},
+            {"role": "user", "content": conversation_text}
+        ]
 
-        # Debug: Log the generated prompt
-        app.logger.info(f"Generated prompt for GPT-3:\n{prompt}")
+        # Debug: Log the message history
+        app.logger.info(f"Messages sent to OpenAI:\n{messages}")
 
-        # Generate a response using OpenAI
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=prompt,
-            max_tokens=100,
+        # Use ChatCompletion endpoint for chat models like gpt-3.5-turbo
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=300,
             n=1,
             stop=["User:"]
         )
@@ -134,7 +132,7 @@ def generate_facilitator_response(user_id):
         # Debug: Log the raw response from OpenAI
         app.logger.info(f"OpenAI response:\n{response}")
 
-        facilitator_response = response.choices[0].text.strip()
+        facilitator_response = response['choices'][0]['message']['content'].strip()
         return facilitator_response
 
     except OpenAIError as oe:
@@ -143,7 +141,6 @@ def generate_facilitator_response(user_id):
     except Exception as e:
         app.logger.error(f"Unexpected error in generate_facilitator_response: {str(e)}")
         return "Sorry, I'm having trouble generating a response. Please try again."
-
 
 
 # WebSocket event handler for receiving messages
@@ -206,7 +203,7 @@ def test_openai():
             {"role": "user", "content": "What is the capital of France?"}
         ]
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-3.5-turbo-1106",
             messages=messages,
             max_tokens=50
         )
@@ -303,14 +300,13 @@ def add_test_data():
 
 @app.route('/generate_response', methods=['POST'])
 def generate_response():
-
     try:
         app.logger.info("generate_response route accessed.")
         app.logger.info(f"Session Data: {session}")
 
         # Get user input from the POST request
         user_input = request.json.get("user_input")
-        
+
         # If no input is provided, return an error message
         if not user_input:
             app.logger.warning("No user input provided in /generate_response")
@@ -340,16 +336,19 @@ def generate_response():
         messages.append({"role": "user", "content": user_input})
 
         # Debugging: Print out the entire message history for verification
-        print(f"Requesting OpenAI with the following messages:\n{messages}")
         app.logger.info(f"Messages sent to OpenAI: {messages}")
 
         # Make the OpenAI API call
         try:
             response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=messages,
-                max_tokens=150
+                model="gpt-3.5-turbo-1106",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": "Hello! How are you today?"}
+                ],
+                max_tokens=100
             )
+
             app.logger.info(f"OpenAI Response: {response}")
         except openai.error.OpenAIError as oe:
             app.logger.error(f"OpenAI Error during request: {str(oe)}")
