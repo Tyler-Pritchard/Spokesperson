@@ -4,7 +4,6 @@ from flask_limiter.util import get_remote_address # type: ignore
 from .models import User, ConversationLog
 from . import db
 import openai # type: ignore
-import traceback
 
 main_bp = Blueprint('main', __name__)
 limiter = Limiter(key_func=get_remote_address)
