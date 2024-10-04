@@ -16,10 +16,6 @@ backend/venv/
 backend/.pytest_cache/
 backend/*.sqlite3
 backend/.coverage
-backend/test_openai.py
-backend/list_engines.py
-spokesperson/backend/test_openai.py
-spokesperson/backend/list_engines.py
 
 # Ignore compiled Python files
 backend/**/*.pyc
