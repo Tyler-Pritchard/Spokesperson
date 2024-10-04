@@ -5,7 +5,7 @@ from dotenv import load_dotenv # type: ignore
 load_dotenv()
 
 # Load environment variables or set OpenAI API key directly
-openai.api_key = os.getenv("OPENAI_API_KEY") 
+openai.api_key = os.getenv("OPENAI_API_KEY")  # type: ignore
 
 response = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",  # Specify the correct model here
