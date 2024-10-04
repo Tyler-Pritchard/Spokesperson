@@ -12,6 +12,7 @@ from flask_sqlalchemy import SQLAlchemy  # type: ignore
 from flask_session import Session # type: ignore
 import sqlalchemy # type: ignore
 from datetime import datetime
+import traceback
 
 # Load environment variables from .env
 load_dotenv()
@@ -44,6 +45,7 @@ CORS(app)
 
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
+print(f"Current OpenAI API Key: {openai.api_key}")
 
 # Initialize the database
 db = SQLAlchemy(app)
@@ -96,26 +98,31 @@ def handle_connect():
         session['user_id'] = 1  # Hardcode for testing/demo purposes
         app.logger.info("User ID set to 1 for session.")
     
-    emit('response', {'message': 'Welcome! You are now connected to the server.'})
+    emit('response', {'id':'0', 'message': 'Welcome! You are now connected to the server.'})
 
     
     
-# Function to generate a dynamic response for the Facilitator
 def generate_facilitator_response(user_id):
-    # Retrieve the previous conversation messages for this user
-    conversation_logs = ConversationLog.query.filter_by(user_id=user_id).order_by(ConversationLog.timestamp).all()
-    conversation_text = "\n".join([f"User: {log.message}" for log in conversation_logs])
-
-    # Prepare the prompt for GPT-3
-    prompt = (
-        f"You are a helpful AI Facilitator guiding a user to build a personalized chatbot profile. "
-        f"Based on the conversation so far, ask a relevant follow-up question or provide insightful commentary.\n\n"
-        f"Previous Conversation:\n{conversation_text}\n\n"
-        f"Facilitator: "
-    )
-
-    # Generate a response using OpenAI
     try:
+        # Retrieve the previous conversation messages for this user
+        conversation_logs = ConversationLog.query.filter_by(user_id=user_id).order_by(ConversationLog.timestamp).all()
+        conversation_text = "\n".join([f"User: {log.message}" for log in conversation_logs])
+
+        # Debug: Log the conversation history
+        app.logger.info(f"Conversation history for user {user_id}:\n{conversation_text}")
+
+        # Prepare the prompt for GPT-3
+        prompt = (
+            f"You are a helpful AI Facilitator guiding a user to build a personalized chatbot profile. "
+            f"Based on the conversation so far, ask a relevant follow-up question or provide insightful commentary.\n\n"
+            f"Previous Conversation:\n{conversation_text}\n\n"
+            f"Facilitator: "
+        )
+
+        # Debug: Log the generated prompt
+        app.logger.info(f"Generated prompt for GPT-3:\n{prompt}")
+
+        # Generate a response using OpenAI
         response = openai.Completion.create(
             engine="text-davinci-003",
             prompt=prompt,
@@ -123,11 +130,20 @@ def generate_facilitator_response(user_id):
             n=1,
             stop=["User:"]
         )
+
+        # Debug: Log the raw response from OpenAI
+        app.logger.info(f"OpenAI response:\n{response}")
+
         facilitator_response = response.choices[0].text.strip()
         return facilitator_response
+
     except OpenAIError as oe:
         app.logger.error(f"OpenAI API Error: {str(oe)}")
         return "Sorry, I'm having trouble generating a response. Please try again."
+    except Exception as e:
+        app.logger.error(f"Unexpected error in generate_facilitator_response: {str(e)}")
+        return "Sorry, I'm having trouble generating a response. Please try again."
+
 
 
 # WebSocket event handler for receiving messages
@@ -137,10 +153,10 @@ def handle_message(data):
     print(f"Message received via WebSocket: {data}")
 
     # Retrieve the user ID from the session
-    user_id = session.get('user_id')
+    user_id = session.get('user_id', 1)
     if not user_id:
         app.logger.error("User ID not found in session during WebSocket message handling.")
-        emit('response', {'message': 'Error: User session is not active.'})
+        emit('response', {'id':'0', 'message': 'Error: User session is not active.'})
         return
 
     # Store the WebSocket message in the database
@@ -151,13 +167,23 @@ def handle_message(data):
         print(f"Message {new_message.id} committed to database")
 
         app.logger.info(f"Message saved to database: {new_message}")
+
+        # Generate a GPT-based response using the conversation history
+        ai_response = generate_facilitator_response(user_id)
+        if ai_response:
+            response_data = {'id': str(new_message.id), 'message': ai_response}
+        else:
+            response_data = {'id': str(new_message.id), 'message': 'Sorry, I couldn’t process your request.'}
+
     except Exception as e:
         app.logger.error(f"Error saving WebSocket message to database: {str(e)}")
         emit('response', {'message': 'Error saving message to the database.'})
         return
 
-    # Emit a structured response back to the client
-    emit('response', {'message': {"id": str(new_message.id), "message": new_message.message}}, broadcast=True)
+    # Emit the GPT-generated response back to the client
+    print(f"Emitting response: {response_data}")
+    emit('response', response_data, broadcast=True)
+
 
 
 # WebSocket event handler for disconnection
@@ -275,25 +301,23 @@ def add_test_data():
         return jsonify({"error": str(e)}), 500
 
 
-# Route to process user input and manage conversation flow
 @app.route('/generate_response', methods=['POST'])
 def generate_response():
+
     try:
         app.logger.info("generate_response route accessed.")
         app.logger.info(f"Session Data: {session}")
 
         # Get user input from the POST request
         user_input = request.json.get("user_input")
-
+        
         # If no input is provided, return an error message
         if not user_input:
             app.logger.warning("No user input provided in /generate_response")
             return jsonify({"error": "No user input provided."}), 400
 
-        # Retrieve the user ID - Hardcoding for now to test
-        user_id = 1
-        # Uncomment the following to use session value once session is fixed
-        # user_id = session.get('user_id')
+        # Retrieve the user ID (ensure it defaults to a known value for now)
+        user_id = session.get('user_id', 1)
         if not user_id:
             app.logger.error("User ID not found in session")
             return jsonify({"error": "User session is not active."}), 400
@@ -301,59 +325,55 @@ def generate_response():
         # Store the user response in the database
         new_message = ConversationLog(user_id=user_id, message=user_input)
         db.session.add(new_message)
-        print(f"Adding message to database: {new_message}")
         db.session.commit()
-        print(f"Message {new_message.id} committed to database")
+        app.logger.info(f"Message {new_message.id} committed to database")
 
-        app.logger.info(f"User Input Received: {user_input}")
+        # Build the message history
+        conversation_logs = ConversationLog.query.filter_by(user_id=user_id).order_by(ConversationLog.timestamp).all()
+        messages = [{"role": "system", "content": "You are a helpful assistant."}]
 
-        # Retrieve the current step from the session or use 0 as default
-        current_step = 0
+        # Add all previous user inputs to the message history
+        for log in conversation_logs:
+            messages.append({"role": "user", "content": log.message})
 
-        # If we are still within the predefined questions, move to the next one
-        if current_step < len(CONVERSATION_FLOW) - 1:
-            next_step = current_step + 1
-            next_question = CONVERSATION_FLOW[next_step]
-            current_step = next_step
+        # Add the most recent user input
+        messages.append({"role": "user", "content": user_input})
 
-            # Log the current state
-            app.logger.info(f"Current step: {next_step}, Next question: {next_question}")
+        # Debugging: Print out the entire message history for verification
+        print(f"Requesting OpenAI with the following messages:\n{messages}")
+        app.logger.info(f"Messages sent to OpenAI: {messages}")
 
-            # Return the next question in the conversation flow
-            return jsonify({"user_input": user_input, "next_question": next_question})
-
-        else:
-            # If the predefined questions are completed, generate an AI summary
-            messages = [
-                {"role": "system", "content": "You are a helpful assistant."}
-            ] + [{"role": "user", "content": user_input}]
-
-            # Generate a summary using OpenAI's ChatCompletion API
+        # Make the OpenAI API call
+        try:
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
                 messages=messages,
                 max_tokens=150
             )
-            print(f"OpenAI Response: {response}")
+            app.logger.info(f"OpenAI Response: {response}")
+        except openai.error.OpenAIError as oe:
+            app.logger.error(f"OpenAI Error during request: {str(oe)}")
+            return jsonify({"error": f"OpenAI API request failed: {str(oe)}"}), 500
 
-            # Extract the AI's response from the result
-            ai_response = response['choices'][0]['message']['content'].strip()
-            app.logger.info(f"Generated AI Summary: {ai_response}")
-            emit('response', {'message': f"Facilitator says: {ai_response}"}, broadcast=True)
+        # Check if the response contains choices and is structured correctly
+        if 'choices' not in response or len(response['choices']) == 0:
+            app.logger.error(f"OpenAI returned an unexpected response: {response}")
+            return jsonify({"error": "OpenAI API returned an empty response. Please try again later."}), 500
 
-            # Reset conversation state after completion
-            session.pop('conversation', None)
-            session.pop('step', None)
+        # Extract the AI's response from the result
+        ai_response = response['choices'][0]['message']['content'].strip()
+        app.logger.info(f"Generated AI Summary: {ai_response}")
 
-            # Return the AI summary as JSON
-            return jsonify({"user_input": user_input, "summary": ai_response})
+        # Return the AI summary as JSON
+        return jsonify({"user_input": user_input, "summary": ai_response})
 
-    except OpenAIError as oe:
+    except openai.error.OpenAIError as oe:
         app.logger.error(f"OpenAI API Error: {str(oe)}")
-        return jsonify({"error": "OpenAI API request failed. Please try again later."}), 500
+        return jsonify({"error": f"OpenAI API request failed: {str(oe)}"}), 500
     except Exception as e:
         app.logger.error(f"Unexpected error in /generate_response: {str(e)}")
-        return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
+        app.logger.error(traceback.format_exc())  # Log the stack trace for debugging
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
     
 # Start the Flask-SocketIO server

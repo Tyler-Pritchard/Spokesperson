@@ -7,6 +7,7 @@ export default function SpokespersonCreation({ navigation }) {
   const [inputText, setInputText] = useState('');
   const [socket, setSocket] = useState(null);
 
+  // Establish WebSocket connection and handle messages
   useEffect(() => {
     const socket = io("http://10.0.0.50:5000", {
       transports: ["websocket"],
@@ -18,36 +19,19 @@ export default function SpokespersonCreation({ navigation }) {
 
     socket.on('connect', () => {
       console.log("Connected to WebSocket server");
-
-      // Fetch conversation history from the backend
-      fetch('http://10.0.0.50:5000/generate_response', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ user_input: "Your sample input here" }),
-      })
-        .then((response) => response.json())
-        .then((data) => console.log("Response from /generate_response: ", data))
-        .catch((error) => console.error("Error calling /generate_response: ", error));      
+      // Emit a test message to initialize the connection
+      socket.emit('message', 'Hello, server!');
     });
 
-    // Listen for incoming messages from the server
-    socket.on("message", (message) => {
-      console.log("Message received from server: ", message);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: prevMessages.length.toString(), message }  // Keep the 'message' key to match the backend
-      ]);
+    socket.on('response', (data) => {
+      console.log("AI Response received from server: ", data);
+      if (data && typeof data === 'object' && data.message) {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { id: prevMessages.length.toString(), message: data.message }
+        ]);
+      }
     });
-
-    socket.on("response", (data) => {
-      console.log("AI Response received from server: ", data.message);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: prevMessages.length.toString(), message: data.message }  // Append AI message
-      ]);
-    });    
 
     return () => {
       socket.disconnect();
@@ -56,12 +40,18 @@ export default function SpokespersonCreation({ navigation }) {
 
   const handleSend = () => {
     if (inputText.trim()) {
-      // Send the input text as a message to the server
+      // Add the user's message to the local state
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { id: prevMessages.length.toString(), message: `User: ${inputText}` },
+      ]);
+  
+      // Send the message through the WebSocket
       socket.emit("message", inputText);
-      setMessages([...messages, { id: messages.length.toString(), message: inputText }]);  // Correct the key here
-      setInputText('');
+      setInputText('');  // Clear the input field
     }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -69,7 +59,9 @@ export default function SpokespersonCreation({ navigation }) {
       <FlatList
         data={messages}
         renderItem={({ item }) => (
-          <Text style={styles.message}>{item.message}</Text>  // Use 'item.message' instead of passing the whole object
+          <Text style={styles.message} key={item.id}>
+            {item.message}
+          </Text>
         )}
         keyExtractor={(item) => item.id}
         style={styles.messageList}
@@ -100,6 +92,7 @@ const styles = StyleSheet.create({
   },
   messageList: {
     flex: 1,
+    marginTop: 20,
   },
   message: {
     backgroundColor: '#f0f0f0',
