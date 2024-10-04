@@ -1,53 +1,66 @@
 # db_test.py
+"""
+Database testing script for the Spokesperson application.
+This script creates a test user and a test conversation log entry,
+then queries and prints the database contents for verification.
+"""
 
-from app import app, db, User, ConversationLog  # Import the app, db, and models from the main application
-from sqlalchemy.exc import SQLAlchemyError
+import sys
+import os
+from sqlalchemy.exc import IntegrityError # type: ignore
 
-def run_db_tests():
-    """
-    Run a series of basic database operations to test the integration of the User and ConversationLog models.
+if os.path.exists('spokesperson.db'):
+    os.remove('spokesperson.db')
 
-    This script will:
-    1. Start the Flask app context.
-    2. Create a test user and add them to the database.
-    3. Create a test conversation log and link it to the test user.
-    4. Query and display all users and messages stored in the database.
-    """
-    try:
-        with app.app_context():  # Start the application context
-            # Step 1: Add a test user to the database
-            test_user = User(username="TestUserDB")
-            db.session.add(test_user)
+# Ensure that the application modules can be imported
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from app import create_app, db  # Import the app factory and db instance
+from app.models import User, ConversationLog  # Import models for database operations
+
+# Create the Flask application using the factory function
+app, _, _ = create_app()  # Ignore socketio and db in the tuple return values for this test
+
+# Use the application context to perform database operations
+with app.app_context():
+    # Check if the test user already exists to avoid duplicate entries
+    existing_user = User.query.filter_by(username="TestUserDB").first()
+
+    if not existing_user:
+        # Create a test user and add to the database
+        test_user = User(username="TestUserDB")
+        db.session.add(test_user)
+        try:
             db.session.commit()
-            print(f"✅ Test user '{test_user.username}' added successfully with ID: {test_user.id}")
+            print(f"Test user '{test_user.username}' added successfully with ID: {test_user.id}")
+        except IntegrityError:
+            db.session.rollback()
+            print("Error: User with username 'TestUserDB' already exists in the database.")
+            test_user = User.query.filter_by(username="TestUserDB").first()
+    else:
+        print(f"User '{existing_user.username}' already exists with ID: {existing_user.id}")
+        test_user = existing_user
 
-            # Step 2: Add a test conversation message for the user
-            test_message = ConversationLog(
-                user_id=test_user.id,
-                message="Hello, this is a test message!"
-            )
-            db.session.add(test_message)
-            db.session.commit()
-            print(f"✅ Test message added successfully with ID: {test_message.id}")
+    # Check if the test message already exists
+    existing_message = ConversationLog.query.filter_by(user_id=test_user.id, message="Hello, this is a test message!").first()
 
-            # Step 3: Query and display all users in the database
-            users = User.query.all()
-            print(f"\nUsers in the database ({len(users)} total):")
-            for user in users:
-                print(f" - ID: {user.id}, Username: {user.username}, Created At: {user.created_at}")
+    if not existing_message:
+        # Create a test conversation log entry associated with the test user
+        test_message = ConversationLog(user_id=test_user.id, message="Hello, this is a test message!")
+        db.session.add(test_message)
+        db.session.commit()
+        print(f"Test message added successfully with ID: {test_message.id}")
+    else:
+        print(f"Message already exists: ID {existing_message.id}, User ID: {existing_message.user_id}")
 
-            # Step 4: Query and display all conversation messages in the database
-            messages = ConversationLog.query.all()
-            print(f"\nMessages in the database ({len(messages)} total):")
-            for message in messages:
-                print(f" - ID: {message.id}, User ID: {message.user_id}, Message: {message.message}, Timestamp: {message.timestamp}")
+    # Query and display all users in the database
+    users = User.query.all()
+    print("Users in the database:")
+    for user in users:
+        print(f" - {user.username} (ID: {user.id})")
 
-    except SQLAlchemyError as sqle:
-        print(f"❌ SQLAlchemy Error: {str(sqle)}")
-        db.session.rollback()  # Rollback the transaction in case of an error
-    except Exception as e:
-        print(f"❌ Unexpected Error: {str(e)}")
-
-
-if __name__ == "__main__":
-    run_db_tests()
+    # Query and display all conversation logs in the database
+    messages = ConversationLog.query.all()
+    print("Messages in the database:")
+    for message in messages:
+        print(f" - User ID: {message.user_id}, Message: '{message.message}', Timestamp: {message.timestamp}")
