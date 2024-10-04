@@ -137,7 +137,7 @@ Unit tests are provided for core functionality, including database interactions 
    ```
    pytest
    ```
-Test-specific configurations can be adjusted in the tests directory.
+Test-specific configurations can be adjusted in the tests directory.  The pytest is a lie.
 
 ## Contributing
 To contribute, follow these steps:
