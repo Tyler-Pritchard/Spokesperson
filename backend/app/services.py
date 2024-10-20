@@ -61,3 +61,30 @@ def generate_facilitator_response(user_id):
     except Exception as e:
         # Return generic errors
         return f"An unexpected error occurred: {str(e)}"
+
+CONVERSATION_FLOW = [
+    {"question": "What is your name?", "type": "text"},
+    {"question": "How old are you?", "type": "number"},
+    {"question": "What is your favorite hobby?", "type": "text"},
+    {"question": "Do you prefer mountains or the beach?", "type": "choice", "options": ["Mountains", "Beach"]},
+    # Add more questions as needed
+]
+
+def get_next_question(conversation_stage):
+    """
+    Retrieve the next question in the conversation flow based on the user's stage.
+
+    Parameters:
+    -----------
+    conversation_stage : int
+        The current stage of the conversation (index in the flow).
+
+    Returns:
+    --------
+    dict or None
+        Returns the next question as a dictionary if available, otherwise returns a message
+        indicating the end of the conversation.
+    """
+    if conversation_stage < len(CONVERSATION_FLOW):
+        return CONVERSATION_FLOW[conversation_stage]
+    return {"question": "Thank you! This concludes the conversation.", "type": "end"}
