@@ -2,6 +2,7 @@ from flask import session  # type: ignore
 from flask_socketio import emit  # type: ignore
 from .models import ConversationLog
 from . import db
+from .services import get_next_question
 import openai  # type: ignore
 
 def register_socket_handlers(socketio, app):
@@ -37,10 +38,14 @@ def register_socket_handlers(socketio, app):
         app.logger.info("Client connected via WebSocket")
         
         # Set a default user ID for the session (for demonstration/testing purposes)
+        if 'conversation_stage' not in session:
+            session['conversation_stage'] = 0  # Initialize conversation stage
         if 'user_id' not in session:
             session['user_id'] = 1
             app.logger.info("Session user_id set to 1 for the new connection.")
         
+        # Get the first question
+        first_question = get_next_question(session['conversation_stage'])
         # Send a welcome message to the newly connected client
         emit('response', {'id': '0', 'message': 'Welcome! You are now connected to the server.'})
 
@@ -60,6 +65,8 @@ def register_socket_handlers(socketio, app):
         try:
             # Retrieve the user ID from the session (default to 1 if not set)
             user_id = session.get('user_id', 1)
+            conversation_stage = session.get('conversation_stage', 0)
+
             app.logger.info(f"Message received from user {user_id}: {data}")
 
             # Store the received message in the database
@@ -81,6 +88,16 @@ def register_socket_handlers(socketio, app):
         except Exception as e:
             app.logger.error(f"Error handling message: {str(e)}")
             emit('response', {'id': '0', 'message': f"An error occurred: {str(e)}"})
+            
+        # Advance to the next question
+        session['conversation_stage'] += 1
+        next_question = get_next_question(session['conversation_stage'])
+
+        if next_question:
+            emit('response', {'id': str(new_message.id), 'message': next_question['question']})
+        else:
+            emit('response', {'id': str(new_message.id), 'message': 'Conversation complete!'})
+
 
     @socketio.on('disconnect')
     def handle_disconnect():

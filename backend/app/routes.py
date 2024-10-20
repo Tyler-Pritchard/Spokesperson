@@ -3,6 +3,7 @@ from flask_limiter import Limiter  # type: ignore
 from flask_limiter.util import get_remote_address  # type: ignore
 from .models import User, ConversationLog
 from . import db
+from .services import get_next_question
 import openai  # type: ignore
 
 # Define the main blueprint for the application
@@ -85,3 +86,12 @@ def generate_response():
     except Exception as e:
         # General error handling for unexpected issues
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+@main_bp.route('/get_next_question', methods=['GET'])
+def get_next_question_route():
+    conversation_stage = session.get('conversation_stage', 0)
+    next_question = get_next_question(conversation_stage)
+    if next_question:
+        return jsonify({"question": next_question['question']})
+    return jsonify({"message": "Conversation complete."})
