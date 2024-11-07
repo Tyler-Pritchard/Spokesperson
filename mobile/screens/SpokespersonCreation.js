@@ -16,13 +16,13 @@ export default function SpokespersonCreation({ navigation }) {
       reconnectionDelayMax: 10000,
     });
     setSocket(socket);
-
+  
     socket.on('connect', () => {
       console.log("Connected to WebSocket server");
-      // Emit a test message to initialize the connection
-      socket.emit('message', 'Hello, server!');
+      // Remove this line to prevent sending an initial message on connection
+      // socket.emit('message', 'Hello, server!');
     });
-
+  
     socket.on('response', (data) => {
       console.log("AI Response received from server: ", data);
       if (data && typeof data === 'object' && data.message) {
@@ -32,11 +32,12 @@ export default function SpokespersonCreation({ navigation }) {
         ]);
       }
     });
-
+  
     return () => {
       socket.disconnect();
     };
   }, []);
+  
 
   const handleSend = () => {
     if (inputText.trim()) {
