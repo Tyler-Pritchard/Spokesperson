@@ -3,3 +3,8 @@ python-dotenv==1.0.1
 openai==0.27.0 
 pytest==7.1.2
 flask-limiter
+sql_alchemy
+flack_socketio
+python-dotenv
+flask_session
+flask_cors
