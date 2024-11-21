@@ -23,7 +23,7 @@ def test_openai_api():
         
         # Make the API call to OpenAI's ChatCompletion endpoint
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",  # Model specification
+            model="o1-preview",  # Model specification
             messages=messages,  # User and system input
             max_tokens=50  # Limit the response length
         )

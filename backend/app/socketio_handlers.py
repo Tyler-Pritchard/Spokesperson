@@ -38,6 +38,7 @@ def register_socket_handlers(socketio, app):
             user_id = session.get('user_id', 1)
             conversation_stage = session.get('conversation_stage', 0)
             user_data = session.get('user_data', {})
+            app.logger.info(f"User data at summary generation: {user_data}")
 
             app.logger.info(f"Message received from user {user_id}: {data}")
             
