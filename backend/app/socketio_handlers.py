@@ -2,7 +2,7 @@ from flask import session, request  # type: ignore
 from flask_socketio import emit  # type: ignore
 from .models import ConversationLog
 from . import db
-from .services import get_next_question, generate_facilitator_response
+from .services import CONVERSATION_FLOW, get_next_question
 
 def register_socket_handlers(socketio, app):
     """
@@ -34,24 +34,20 @@ def register_socket_handlers(socketio, app):
         """
         Handles incoming messages from WebSocket clients.
         """
-        try:
-            user_id = session.get('user_id', 1)
-            conversation_stage = session.get('conversation_stage', 0)
-            user_data = session.get('user_data', {})
-            app.logger.info(f"User data at summary generation: {user_data}")
+        user_id = session.get('user_id', 1)
+        conversation_stage = session.get('conversation_stage', 0)
+        user_data = session.get('user_data', {})
+        new_message = None
 
+        try:
             app.logger.info(f"Message received from user {user_id}: {data}")
-            
-            # Save user response in user_data
-            if conversation_stage == 0:
-                user_data['name'] = data
-            elif conversation_stage == 1:
-                user_data['age'] = data
-            elif conversation_stage == 2:
-                user_data['gender'] = data
-            elif conversation_stage == 3:
-                user_data['hobby'] = data
-            session['user_data'] = user_data  # Save to session
+
+            # Save user response in user_data based on the current stage
+            if conversation_stage < len(CONVERSATION_FLOW):
+                key = CONVERSATION_FLOW[conversation_stage]["key"]
+                user_data[key] = data
+            session['user_data'] = user_data  # Update session data
+            app.logger.info(f"Updated user_data: {user_data}")
 
             # Log the message in the database
             new_message = ConversationLog(user_id=user_id, message=data)
@@ -59,21 +55,30 @@ def register_socket_handlers(socketio, app):
             db.session.commit()
             app.logger.info(f"Message {new_message.id} saved to the database.")
 
-            # Move to the next stage
+            # Move to the next stage and fetch the next question
             session['conversation_stage'] += 1
             next_question = get_next_question(session['conversation_stage'], user_data)
-            
+
             # Check if we are at the end of the conversation
             if next_question["type"] == "end":
                 emit('response', {'id': str(new_message.id), 'message': next_question["question"]})
-                session['conversation_stage'] = 0  # Reset for new conversation
-                session['user_data'] = {}  # Clear user data after summary
+                # Reset the session for a new conversation
+                session['conversation_stage'] = 0
+                session['user_data'] = {}
             else:
                 emit('response', {'id': str(new_message.id), 'message': next_question["question"]})
 
         except Exception as e:
             app.logger.error(f"Error handling message for user {user_id}: {str(e)}")
             emit('response', {'id': '0', 'message': f"An error occurred: {str(e)}"})
+
+        finally:
+            # Ensure consistent state and logging
+            if new_message:
+                app.logger.info(f"Completed handling of message {new_message.id} for user {user_id}.")
+            else:
+                app.logger.warning(f"No message object was created during handling for user {user_id}.")
+            app.logger.info(f"Final user_data state for user {user_id}: {session.get('user_data', {})}")
 
     @socketio.on('disconnect')
     def handle_disconnect():
