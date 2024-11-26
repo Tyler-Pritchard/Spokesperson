@@ -2,7 +2,7 @@ from flask import session, request  # type: ignore
 from flask_socketio import emit  # type: ignore
 from .models import ConversationLog
 from . import db
-from .services import CONVERSATION_FLOW, get_next_question
+from .services import CONVERSATION_FLOW, get_next_question, validate_input
 
 def register_socket_handlers(socketio, app):
     """
@@ -44,10 +44,20 @@ def register_socket_handlers(socketio, app):
 
             # Save user response in user_data based on the current stage
             if conversation_stage < len(CONVERSATION_FLOW):
-                key = CONVERSATION_FLOW[conversation_stage]["key"]
+                question_data = CONVERSATION_FLOW[conversation_stage]
+                input_type = question_data["type"]
+                key = question_data["key"]
+                options = question_data.get("options", None)
+
+                # Validate input
+                if not validate_input(data, input_type, options):
+                    emit('response', {'id': '0', 'message': f"Invalid input for {question_data['question']}."})
+                    return
+
+                # Save valid data
                 user_data[key] = data
-            session['user_data'] = user_data  # Update session data
-            app.logger.info(f"Updated user_data: {user_data}")
+                session['user_data'] = user_data  # Update session data
+                app.logger.info(f"Updated user_data: {user_data}")
 
             # Log the message in the database
             new_message = ConversationLog(user_id=user_id, message=data)

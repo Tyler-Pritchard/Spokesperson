@@ -71,3 +71,33 @@ def generate_facilitator_response(user_data):
 
     return f"Nice to meet you, {name}! You are {age} years old, identify as {gender}, and enjoy {hobby}."
     
+    
+def validate_input(input_value, input_type, options=None):
+    """
+    Validate the user input based on the expected input type.
+
+    Parameters:
+    -----------
+    input_value : str
+        The input provided by the user.
+    input_type : str
+        The expected type of the input (e.g., text, number, choice).
+    options : list, optional
+        Valid options for 'choice' type inputs.
+
+    Returns:
+    --------
+    bool
+        True if input is valid, False otherwise.
+    """
+    try:
+        if input_type == "text":
+            return bool(input_value.strip())
+        elif input_type == "number":
+            return input_value.isdigit() and int(input_value) > 0
+        elif input_type == "choice":
+            return input_value in options if options else False
+        else:
+            return False
+    except Exception:
+        return False
