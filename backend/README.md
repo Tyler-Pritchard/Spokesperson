@@ -95,10 +95,9 @@ Ensure that the following software is installed:
    ```
    pip install -r requirements.txt
    ```
-5. Install Frontend Dependencies: Navigate to the frontend directory (if applicable) and install the necessary Node.js packages:
-   ```
-   npm install
-   ```
+5. Install Frontend Dependencies
+   See: [/mobile/README.md](../mobile//README.md)
+   
 ## Configuration
 
 1. Environment Variables: Create a ```.env``` file from the provided ```.env.example``` file and configure the required variables:
@@ -111,11 +110,11 @@ Ensure that the following software is installed:
    FLASK_ENV=development
    SECRET_KEY=your_flask_secret_key
    ```
-2. Database Setup: By default, the application uses an SQLite database (```spokesperson.db```). To populate the database with initial data, run:
+1. Database Setup: By default, the application uses an SQLite database (```spokesperson.db```). To populate the database with initial data, run:
    ```
    python scripts/populate_data.py
    ```
-3. Logging Configuration: Adjust logging levels and log file paths in ```config/config.py``` as needed.
+2. Logging Configuration: Adjust logging levels and log file paths in ```config/config.py``` as needed.
 
 ## Running the Application
 Start the Flask development server:
